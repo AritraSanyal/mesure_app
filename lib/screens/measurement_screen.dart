@@ -82,8 +82,10 @@ class _MeasurementScreenState extends State<MeasurementScreen>
     WakelockPlus.enable();
     HapticFeedback.mediumImpact();
 
-    // Turn on torch flash for finger PPG
-    await _camCtrl!.setFlashMode(FlashMode.torch);
+    // Turn on torch only in torch mode
+    if (_useTorchMode) {
+      await _camCtrl!.setFlashMode(FlashMode.torch);
+    }
 
     // Start image stream
     await _camCtrl!.startImageStream(_processFrame);
