@@ -80,6 +80,9 @@ class _MeasurementScreenState extends State<MeasurementScreen>
     WakelockPlus.enable();
     HapticFeedback.mediumImpact();
 
+    // Turn on torch flash for finger PPG
+    await _camCtrl!.setFlashMode(FlashMode.torch);
+
     // Start image stream
     await _camCtrl!.startImageStream(_processFrame);
 
@@ -155,8 +158,9 @@ class _MeasurementScreenState extends State<MeasurementScreen>
     green /= count;
     blue /= count;
 
-    // Finger detection heuristic: red channel should dominate with ambient light
-    final bool fingerNow = red > 50 && red > green * 1.2 && red > blue * 1.2;
+    // Finger detection heuristic: green channel dominates with finger coverage
+    final bool fingerNow =
+        green > 50 && green > red * 0.8 && green > blue * 0.8;
 
     _processor.addFrame(red: red, green: green, blue: blue);
 
@@ -179,6 +183,7 @@ class _MeasurementScreenState extends State<MeasurementScreen>
     if (_camCtrl?.value.isStreamingImages == true) {
       await _camCtrl!.stopImageStream();
     }
+    await _camCtrl?.setFlashMode(FlashMode.off);
     WakelockPlus.disable();
     setState(() => _isRecording = false);
   }
@@ -453,7 +458,7 @@ class _MeasurementScreenState extends State<MeasurementScreen>
   Widget _buildInstructions() {
     final steps = [
       ('1', '📱', 'Open app, tap START'),
-      ('2', '☝️', 'Place fingertip over back camera'),
+      ('2', '🔦', 'Place fingertip over back camera with flash'),
       ('3', '🤫', 'Stay still, keep gentle pressure'),
       ('4', '⏱', 'Wait 30 seconds for results'),
     ];

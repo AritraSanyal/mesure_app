@@ -31,8 +31,8 @@ class PPGProcessor {
     _rawGreen.add(green);
     _rawBlue.add(blue);
 
-    // Primary signal = RED channel (best for finger PPG with torch)
-    final filtered = _applyBandpassFilter(_rawRed);
+    // Primary signal = GREEN channel (better for smartphone PPG detection)
+    final filtered = _applyBandpassFilter(_rawGreen);
     _filteredSignal.add(filtered.last);
 
     // Detect peaks in sliding window
@@ -106,7 +106,8 @@ class PPGProcessor {
     _peakIndices.clear();
 
     final sig = _filteredSignal;
-    final int minDistance = (sampleRate * 0.4).round(); // min 400 ms between beats
+    final int minDistance =
+        (sampleRate * 0.4).round(); // min 400 ms between beats
     final double mean = sig.reduce((a, b) => a + b) / sig.length;
     final double std = sqrt(
       sig.map((v) => pow(v - mean, 2)).reduce((a, b) => a + b) / sig.length,
@@ -114,11 +115,8 @@ class PPGProcessor {
     final double threshold = mean + 0.4 * std;
 
     for (int i = 1; i < sig.length - 1; i++) {
-      if (sig[i] > threshold &&
-          sig[i] > sig[i - 1] &&
-          sig[i] > sig[i + 1]) {
-        if (_peakIndices.isEmpty ||
-            i - _peakIndices.last >= minDistance) {
+      if (sig[i] > threshold && sig[i] > sig[i - 1] && sig[i] > sig[i + 1]) {
+        if (_peakIndices.isEmpty || i - _peakIndices.last >= minDistance) {
           _peakIndices.add(i);
         }
       }
@@ -190,8 +188,7 @@ class PPGProcessor {
     double cumTime = 0;
     for (int i = 0; i < n; i++) {
       final double ts = i / resampleRate;
-      while (rrIdx < rr.length - 1 &&
-          cumTime + rr[rrIdx] / 1000 < ts) {
+      while (rrIdx < rr.length - 1 && cumTime + rr[rrIdx] / 1000 < ts) {
         cumTime += rr[rrIdx] / 1000;
         rrIdx++;
       }
@@ -242,8 +239,7 @@ class PPGProcessor {
   //
   // ⚠ These are ESTIMATES for wellness monitoring, not medical-grade.
   // ──────────────────────────────────────────────────────────────────
-  _BPEstimate _estimateBloodPressure(
-    List<double> rr, HRVMetrics hrv) {
+  _BPEstimate _estimateBloodPressure(List<double> rr, HRVMetrics hrv) {
     final double hr = _computeHeartRate(rr);
     final double si = _computeStiffnessIndex();
 
