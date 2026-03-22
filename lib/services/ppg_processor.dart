@@ -13,6 +13,11 @@ class PPGProcessor {
   static const double highCutHz = 4.0; // BPF high edge (~240 BPM)
   static const int minMeasurementFrames = 30 * 30; // 30 seconds
 
+  // ── Channel selection ─────────────────────────────────────────────
+  final bool useGreenChannel;
+
+  PPGProcessor({this.useGreenChannel = true});
+
   // ── Internal state ────────────────────────────────────────────────
   final List<double> _rawRed = [];
   final List<double> _rawGreen = [];
@@ -31,8 +36,9 @@ class PPGProcessor {
     _rawGreen.add(green);
     _rawBlue.add(blue);
 
-    // Primary signal = GREEN channel (better for smartphone PPG detection)
-    final filtered = _applyBandpassFilter(_rawGreen);
+    // Primary signal based on channel selection
+    final primarySignal = useGreenChannel ? _rawGreen : _rawRed;
+    final filtered = _applyBandpassFilter(primarySignal);
     _filteredSignal.add(filtered.last);
 
     // Detect peaks in sliding window

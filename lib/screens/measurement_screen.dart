@@ -20,10 +20,11 @@ class MeasurementScreen extends StatefulWidget {
 class _MeasurementScreenState extends State<MeasurementScreen>
     with WidgetsBindingObserver {
   CameraController? _camCtrl;
-  final PPGProcessor _processor = PPGProcessor();
+  late PPGProcessor _processor;
   final HistoryService _history = HistoryService();
 
   bool _isRecording = false;
+  bool _useTorchMode = false; // Default: ambient mode (green channel)
   bool _fingerDetected = false;
   int _secondsElapsed = 0;
   Timer? _timer;
@@ -36,6 +37,7 @@ class _MeasurementScreenState extends State<MeasurementScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _processor = PPGProcessor(useGreenChannel: !_useTorchMode);
     _initCamera();
   }
 
@@ -158,9 +160,14 @@ class _MeasurementScreenState extends State<MeasurementScreen>
     green /= count;
     blue /= count;
 
-    // Finger detection heuristic: green channel dominates with finger coverage
-    final bool fingerNow =
-        green > 50 && green > red * 0.8 && green > blue * 0.8;
+    // Finger detection based on mode
+    final bool fingerNow = _useTorchMode
+        ? (red > 100 &&
+            red > green * 1.3 &&
+            red > blue * 1.3) // Red-based for torch
+        : (green > 50 &&
+            green > red * 0.8 &&
+            green > blue * 0.8); // Green-based for ambient
 
     _processor.addFrame(red: red, green: green, blue: blue);
 
@@ -231,6 +238,20 @@ class _MeasurementScreenState extends State<MeasurementScreen>
             Navigator.pop(context);
           },
         ),
+        actions: [
+          IconButton(
+            icon: Icon(_useTorchMode ? Icons.flash_on : Icons.eco),
+            color: _useTorchMode ? AppTheme.gold : AppTheme.green,
+            onPressed: () {
+              setState(() {
+                _useTorchMode = !_useTorchMode;
+                _processor = PPGProcessor(useGreenChannel: !_useTorchMode);
+              });
+            },
+            tooltip:
+                _useTorchMode ? 'Torch Mode (Red)' : 'Ambient Mode (Green)',
+          ),
+        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -458,9 +479,10 @@ class _MeasurementScreenState extends State<MeasurementScreen>
   Widget _buildInstructions() {
     final steps = [
       ('1', '📱', 'Open app, tap START'),
-      ('2', '🔦', 'Place fingertip over back camera with flash'),
+      ('2', '☁️', 'Place fingertip over back camera'),
       ('3', '🤫', 'Stay still, keep gentle pressure'),
       ('4', '⏱', 'Wait 30 seconds for results'),
+      ('5', '🔄', 'Toggle torch/ambient mode if needed'),
     ];
     return Container(
       padding: const EdgeInsets.all(16),
