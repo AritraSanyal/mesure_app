@@ -15,6 +15,7 @@ class AppTheme {
   static const Color textSecondary = Color(0xFF8BA8C0);
   static const Color divider = Color(0xFF2A4060);
 
+  // Dark Theme
   static ThemeData get dark => ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,
@@ -26,7 +27,11 @@ class AppTheme {
           onPrimary: navy,
           onSurface: textPrimary,
         ),
+
+        //card color
         cardColor: card,
+
+        //text theme
         fontFamily: 'SF Pro Display',
         textTheme: const TextTheme(
           displayLarge: TextStyle(
@@ -76,6 +81,8 @@ class AppTheme {
             color: teal,
           ),
         ),
+
+        // Appbar theme
         appBarTheme: const AppBarTheme(
           backgroundColor: navy,
           elevation: 0,
@@ -87,6 +94,8 @@ class AppTheme {
           ),
           iconTheme: IconThemeData(color: teal),
         ),
+
+        // elevated button theme
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: teal,
