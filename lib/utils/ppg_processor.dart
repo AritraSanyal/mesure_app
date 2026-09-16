@@ -1,17 +1,18 @@
 import 'dart:math';
 
 class PPGProcessor {
+  // function to smooth the signal
   static List<double> smooth(List<double> signal, int windowSize) {
     List<double> smoothed = [];
     for (int i = 0; i < signal.length - windowSize + 1; i++) {
-      double avg =
-          signal.sublist(i, i + windowSize).reduce((a, b) => a + b) /
+      double avg = signal.sublist(i, i + windowSize).reduce((a, b) => a + b) /
           windowSize;
       smoothed.add(avg);
     }
     return smoothed;
   }
 
+  // function to calculate heart rate
   static int calculateHeartRate(List<double> signal, int durationSeconds) {
     if (signal.length < 3) return 0;
     List<double> smoothed = smooth(signal, 5);
@@ -26,6 +27,7 @@ class PPGProcessor {
     return ((peakCount / durationSeconds) * 60).round();
   }
 
+  // funciton to calculate HRV (heart rate veriability)
   static double calculateHRV(List<int> rrIntervals) {
     if (rrIntervals.length < 2) return 0;
     List<double> diffs = [];
@@ -37,6 +39,11 @@ class PPGProcessor {
     return sqrt(sumSquares / diffs.length);
   }
 
+  // function to extimate blood pressure
+  /*
+    This is a wellness estimation --- not a clinical measurement ---
+    Accurate bp measurement requires user-specific calibration
+  */
   static String estimateBloodPressure(int hr, double hrv) {
     double sbp = 0.72 * hr + 0.5 * hrv + 80;
     double dbp = 0.4 * hr + 0.3 * hrv + 50;
