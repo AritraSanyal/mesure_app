@@ -45,7 +45,7 @@ class _PPGWaveformWidgetState extends State<PPGWaveformWidget>
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: widget.isRecording
-              ? AppTheme.teal.withOpacity(0.4)
+              ? AppTheme.teal.withValues(alpha: 0.4)
               : AppTheme.divider,
           width: 1.5,
         ),
@@ -136,11 +136,11 @@ class _RecordingDotState extends State<_RecordingDot>
         width: 8,
         height: 8,
         decoration: BoxDecoration(
-          color: AppTheme.coral.withOpacity(_anim.value),
+          color: AppTheme.coral.withValues(alpha: _anim.value),
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: AppTheme.coral.withOpacity(0.5 * _anim.value),
+              color: AppTheme.coral.withValues(alpha: 0.5 * _anim.value),
               blurRadius: 6,
             ),
           ],
@@ -161,12 +161,13 @@ class _QualityBadge extends StatelessWidget {
         : quality > 40
             ? AppTheme.gold
             : AppTheme.coral;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.4)),
+        border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -174,9 +175,7 @@ class _QualityBadge extends StatelessWidget {
           Icon(Icons.signal_cellular_alt, size: 12, color: color),
           const SizedBox(width: 4),
           Text(
-            quality > 0
-                ? '${quality.toInt()}% quality'
-                : 'Waiting...',
+            quality > 0 ? '${quality.toInt()}% quality' : 'Waiting...',
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,
@@ -245,14 +244,14 @@ class _WaveformPainter extends CustomPainter {
       ..strokeWidth = 2.0
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
-      ..color = color.withOpacity(0.85);
+      ..color = color.withValues(alpha: 0.85);
 
     // Glow paint
     final glowPaint = Paint()
       ..strokeWidth = 4.0
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
-      ..color = color.withOpacity(0.2)
+      ..color = color.withValues(alpha: 0.2)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
 
     final path = Path();
@@ -260,9 +259,9 @@ class _WaveformPainter extends CustomPainter {
 
     for (int i = 0; i < data.length; i++) {
       final double x = i / (data.length - 1) * size.width;
-      final double y =
-          size.height - (data[i] - minV) / range * (size.height * 0.75) -
-              size.height * 0.1;
+      final double y = size.height -
+          (data[i] - minV) / range * (size.height * 0.75) -
+          size.height * 0.1;
 
       if (i == 0) {
         path.moveTo(x, y);
